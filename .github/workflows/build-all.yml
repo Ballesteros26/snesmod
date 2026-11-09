@@ -26,6 +26,9 @@ jobs:
           install: make  
       - name: Clone SNESKIT  
         run: git clone --depth 1 https://github.com/mukunda-/sneskit.git sneskit  
+      - name: Create sneskit bin dir  
+        run: mkdir -p sneskit/bin  
+        shell: msys2 {0}  
       - name: Build SNESKIT tools  
         run: make all  
         working-directory: sneskit  
