@@ -1,0 +1,42 @@
+name: build-windows  
+  
+on:  
+  push:  
+    branches: [ main, master ]  
+  pull_request:  
+  workflow_dispatch:  
+  
+jobs:  
+  build-smconv-go:  
+    runs-on: windows-latest  
+    defaults:  
+      run:  
+        working-directory: smconv  
+    steps:  
+      - uses: actions/checkout@v4  
+      - uses: actions/setup-go@v5  
+        with:  
+          go-version-file: smconv/go.mod  
+          cache-dependency-path: smconv/go.sum  
+      - name: Build smconv.exe  
+        run: go build -o build/smconv.exe .  
+      - name: Run tests  
+        run: go test ./...  
+      - uses: actions/upload-artifact@v4  
+        with:  
+          name: smconv-go-win10  
+          path: smconv/build/smconv.exe  
+  
+  build-convert-cpp:  
+    runs-on: windows-latest  
+    defaults:  
+      run:  
+        working-directory: convert  
+    steps:  
+      - uses: actions/checkout@v4  
+      - name: Build legacy converter with MSVC  
+        run: cl /EHsc /O2 /Fe:smconv-legacy.exe source/brr.cpp source/convert.cpp source/io.cpp source/itloader.cpp source/inputdata.cpp source/it2spc.cpp  
+      - uses: actions/upload-artifact@v4  
+        with:  
+          name: smconv-legacy-win10  
+          path: convert/smconv-legacy.exe
