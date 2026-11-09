@@ -1,0 +1,58 @@
+name: build-driver-example  
+  
+on:  
+  push:  
+    branches: [ main, master ]  
+  pull_request:  
+  workflow_dispatch:  
+  
+env:  
+  SNESKIT: ${{ github.workspace }}/sneskit  
+  
+jobs:  
+  build-driver-and-example:  
+    runs-on: windows-latest  
+    steps:  
+      - uses: actions/checkout@v4  
+      - uses: actions/setup-go@v5  
+        with:  
+          go-version-file: smconv/go.mod  
+      - uses: actions/setup-python@v5  
+        with:  
+          python-version: "3.x"  
+      - uses: msys2/setup-msys2@v2  
+        with:  
+          msystem: MINGW64  
+          install: make  
+      - name: Clone SNESKIT  
+        run: git clone --depth 1 https://github.com/mukunda-/sneskit.git sneskit  
+      - name: Build SNESKIT tools  
+        run: make all  
+        working-directory: sneskit  
+        shell: msys2 {0}  
+      - name: Build local smconv and install into SNESKIT  
+        run: go build -o build/smconv.exe . && cp build/smconv.exe "$SNESKIT/bin/smconv.exe"  
+        working-directory: smconv  
+        shell: msys2 {0}  
+      - name: Mirror bin tools into tools dir  
+        run: mkdir -p "$SNESKIT/tools" && cp "$SNESKIT"/bin/* "$SNESKIT/tools/"  
+        shell: msys2 {0}  
+      - name: Build SPC driver with bundled TASM  
+        run: make PYTHON=python  
+        working-directory: driver  
+        shell: msys2 {0}  
+      - name: Install driver into SNESKIT  
+        run: make install PYTHON=python  
+        working-directory: driver  
+        shell: msys2 {0}  
+      - name: Build example ROM  
+        run: make  
+        working-directory: example  
+        shell: msys2 {0}  
+      - uses: actions/upload-artifact@v4  
+        with:  
+          name: driver-and-rom  
+          path: |  
+            driver/build/sm_spc.bin  
+            driver/build/sm_spc_image.asm  
+            example/build/*.sfc
