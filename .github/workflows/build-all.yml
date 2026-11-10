@@ -50,7 +50,7 @@ jobs:
         working-directory: driver  
         shell: msys2 {0}  
       - name: Build example ROM  
-        run: make  
+        run: make SNESCHK="python $SNESKIT/bin/sneschk.py"  
         working-directory: example  
         shell: msys2 {0}  
       - uses: actions/upload-artifact@v4  
