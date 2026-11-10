@@ -22,7 +22,8 @@ jobs:
           python-version: "3.x"  
       - uses: msys2/setup-msys2@v2  
         with:  
-          msystem: MINGW64  
+          msystem: UCRT64  
+          path-type: inherit  
           install: make  
       - name: Clone SNESKIT  
         run: git clone --depth 1 https://github.com/mukunda-/sneskit.git sneskit  
